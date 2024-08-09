@@ -8,6 +8,7 @@ const auth_1 = __importDefault(require("./routes/auth"));
 const general_ticket_1 = __importDefault(require("./routes/general_ticket"));
 const reserve_ticket_1 = __importDefault(require("./routes/reserve_ticket"));
 const trains_1 = __importDefault(require("./routes/trains"));
+const station_1 = __importDefault(require("./routes/station"));
 const router = express_1.default.Router();
 /*
  *  Controllers (route handlers)
@@ -20,6 +21,7 @@ console.log("I am  running");
 router.use("/products", productsRouter);
 router.use("/general_ticket", general_ticket_1.default);
 router.use("/reservation", reserve_ticket_1.default);
+router.use("/station", station_1.default);
 router.use("/train", trains_1.default);
 router.use("/user", auth_1.default);
 module.exports = router;

@@ -21,11 +21,11 @@ const constants_1 = require("../constants");
 const geolib_1 = require("geolib");
 const moment_1 = __importDefault(require("moment"));
 const validation_1 = require("./validation");
+const html_1 = __importDefault(require("./html"));
 exports.protect = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let token;
-        if (req.headers.authorization &&
-            req.headers.authorization.startsWith("Bearer")) {
+        if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
             token = req.headers.authorization.split(" ")[1];
         }
         if (!token) {
@@ -44,10 +44,12 @@ exports.protect = (req, res, next) => __awaiter(void 0, void 0, void 0, function
         if (dbuser.length === 0) {
             throw { message: "Invalid user" };
         }
-        req.user = dbuser[0];
+        req.body.__user = dbuser[0];
+        console.log("RRRRRRRRRRRRRRRRRRRRRRRR", req.body.__user, req.originalUrl);
         next();
     }
     catch (error) {
+        console.log(req.body, "PPPPPPPPPPPPPPPPPPPPPPPPPPPPP");
         const err = error;
         res.status(400).json({
             error: true,
@@ -79,7 +81,7 @@ exports.create_date = (date, time, minutes_to_add) => {
     ].join(":");
     return [formatedDate, formatedTime];
 };
-const check_timeLimit = (dateStr, timeStr) => {
+exports.check_timeLimit = (dateStr, timeStr) => {
     try {
         const initialDate = new Date(dateStr);
         const [hours, minutes, seconds] = timeStr.split(":").map(Number);
@@ -133,7 +135,6 @@ exports.calculate_amount = (train_id, num_of_customers, minutes) => {
     else if (id === 3) {
         rate = constants_1.rate_train_three;
     }
-    console.log("AAAAAAAAAAAAAAAAAA", num_of_customers, minutes, rate);
     const amount = num_of_customers * minutes * rate;
     return amount;
 };
@@ -147,7 +148,6 @@ exports.validateDay = (days, date, start_time, total_minute) => {
     const [hours, minutes, second] = start_time.split(":").map(Number);
     initialDate.setHours(hours, minutes, second);
     for (let i = day; i >= 0; i--) {
-        console.log("DEFDEREDFDGFVCDFVCDFFVDFFCDFCXFCV", `${initialDate.getFullYear()}-${initialDate.getMonth() + 1}-${initialDate.getDate()}`);
         previous_date = new Date(initialDate);
         console.log(previous_date);
         initialDate.setMinutes(initialDate.getMinutes() + total_minute);
@@ -187,10 +187,7 @@ exports.send_mail = ({ reciever, html, subject, sender }) => __awaiter(void 0, v
 });
 exports.create_random_token = () => {
     const random_token = crypto_1.default.randomBytes(32).toString("hex");
-    const hashed_token = crypto_1.default
-        .createHash("sha256")
-        .update(random_token)
-        .digest("hex");
+    const hashed_token = crypto_1.default.createHash("sha256").update(random_token).digest("hex");
     return [random_token, hashed_token];
 };
 exports.calculate_distance = (p1, p2) => {
@@ -212,11 +209,13 @@ exports.validate_body = (schema) => {
     return (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const validate = yield validation_1.applyValidation(schema, req.body);
-            req.body = validate;
+            req.body = Object.assign(Object.assign({}, req.body), validate);
+            console.log("fwerjdhshfsdfjsakjfaksskh", req.body);
             next();
         }
         catch (error) {
             const err = error;
+            console.log(err, "qwertyeytrtru");
             res.status(400).json({
                 error: true,
                 message: err.message,
@@ -225,4 +224,43 @@ exports.validate_body = (schema) => {
         }
     });
 };
+exports.generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
+exports.send_otp = (otp, reciever) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        let html = html_1.default.replace("REPLACE_WITH_HTML_CONTENT", `<p>this is your six digit otp . ${otp}  </p>`);
+        html = html.replace("REPLACE_WITH_LINK", "");
+        html = html.replace("REPLACE_WITH_TAB", "");
+        const subject = "otp";
+        const sender = "feraz@gmail.com";
+        const mail_response = yield exports.send_mail({
+            html,
+            sender,
+            subject,
+            reciever,
+        });
+        return mail_response;
+    }
+    catch (error) {
+        throw error;
+    }
+});
+exports.create_insert_many_query = (table, data) => {
+    const column = Object.keys(data[0]);
+    const columnNames = column.join(',');
+    const values = data.map((record) => {
+        const valueList = column.map((col) => {
+            let value = record[col];
+            if (typeof value === 'string') {
+                value = value.replace(/'/g, '"');
+            }
+            return `'${value}'`;
+        }).join(",");
+        return `(${valueList})`;
+    }).join(',');
+    const query = `INSERT INTO ${table} (${columnNames}) VALUES ${values} RETURNING id`;
+    return query;
+};
+exports.signToken = (id) => jsonwebtoken_1.default.sign({ id }, process.env.JWT_SECRET || "90d", {
+    expiresIn: process.env.JWT_EXPIRES_IN,
+});
 //# sourceMappingURL=helpfn.js.map

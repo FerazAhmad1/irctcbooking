@@ -1,20 +1,15 @@
 import express from "express";
-import {
-  signup_test,
-  login,
-  update_role,
-  forgot_password,
-  reset_password,
-} from "../controller/users";
+import { signup_otp, login, update_role, forgot_password, reset_password, verify_otp } from "../controller/users";
 import { validate_body } from "../helper.ts/helpfn";
-import { signupSchema } from "../helper.ts/schema";
+import { signupSchema, forgot_password_schema, reset_password_schema, login_schema } from "../helper.ts/schema";
 import { protect, restrict_to } from "../helper.ts/helpfn";
 
 const router = express.Router();
 console.log("I am auth router running");
-router.post("/signup", validate_body(signupSchema), signup_test);
-router.post("/login", login);
+router.post("/signup", validate_body(forgot_password_schema), signup_otp);
+router.post("/verifyotp", validate_body(signupSchema), verify_otp);
+router.post("/login", validate_body(login_schema), login);
 router.post("/approoverole", protect, restrict_to("user"), update_role);
-router.post("/forgotpassword", forgot_password);
-router.post("/resetpassword/:token", reset_password);
+router.post("/forgotpassword", validate_body(forgot_password_schema), forgot_password);
+router.post("/resetpassword/:token", validate_body(reset_password_schema), reset_password);
 export default router;

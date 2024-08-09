@@ -8,14 +8,14 @@ const moment_1 = __importDefault(require("moment"));
 // const moment = require('moment');
 // Define a custom date format validation schema using Joi's custom method
 const person_schema = joi_1.default.object({
-    first_name: joi_1.default
+    firstname: joi_1.default
         .string()
         .trim()
         .min(3)
         .max(255)
         .pattern(/^[A-Za-z]+$/)
         .required(),
-    last_name: joi_1.default
+    lastname: joi_1.default
         .string()
         .trim()
         .min(3)
@@ -23,7 +23,7 @@ const person_schema = joi_1.default.object({
         .pattern(/^[A-Za-z]+$/)
         .required(),
     dob: joi_1.default.date().iso().required(),
-});
+}).unknown(true);
 const customDateFormat = joi_1.default
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)
@@ -70,15 +70,23 @@ exports.signupSchema = joi_1.default.object({
         .length(10)
         .required(),
     email: joi_1.default.string().trim().email().required(),
+    otp: joi_1.default
+        .string()
+        .trim()
+        .length(6)
+        .pattern(/^[0-9]+$/)
+        .required(),
+    role: joi_1.default.string().trim().valid("user").required(),
     password: joi_1.default.string().trim().min(8).required(),
-});
+    dob: joi_1.default.date().iso().required()
+}).unknown(true);
 exports.login_schema = joi_1.default.object({
     email: joi_1.default.string().trim().email().required(),
     password: joi_1.default.string().min(8).max(255).required(),
-});
+}).unknown(true);
 exports.reserve_ticket_schema = joi_1.default.object({
-    from: joi_1.default.string().min(2).max(255).required(),
-    to: joi_1.default.string().min(2).max(255).required(),
+    from_id: joi_1.default.string().max(255).required(),
+    to_id: joi_1.default.string().max(255).required(),
     startdate: customDateFormat.required(),
     trainnumber: joi_1.default
         .string()
@@ -105,25 +113,33 @@ exports.reserve_ticket_schema = joi_1.default.object({
         .length(6)
         .required(),
     state: joi_1.default.string().min(3).max(255).required(),
-});
+}).unknown(true);
 exports.search_train_schema = joi_1.default.object({
     from: joi_1.default.string().min(2).max(255).required(),
     to: joi_1.default.string().min(2).max(255).required(),
     date_of_journey: customDateFormat.required(),
-});
+}).unknown(true);
 exports.forgot_password_schema = joi_1.default.object({
     email: joi_1.default.string().trim().email().required(),
-});
+}).unknown(true);
 exports.reset_password_schema = joi_1.default.object({
+    email: joi_1.default.string().trim().email().required(),
     password: joi_1.default.string().trim().min(8).max(255).required(),
-});
+}).unknown(true);
 exports.general_ticket_schema = joi_1.default.object({
     from: joi_1.default.string().min(2).max(255).required(),
     to: joi_1.default.string().min(2).max(255).required(),
     train_type: joi_1.default.string().valid("SF", "EX").required(),
     quantity: joi_1.default.number().min(1).max(4).required(),
-});
+}).unknown(true);
 exports.cancel_ticket_schema = joi_1.default.object({
     pnr: joi_1.default.string().length(10).required(),
-});
+}).unknown(true);
+exports.search_station_schema = joi_1.default.object({
+    station_name_or_code: joi_1.default.string().min(2).max(255).required(),
+    page: joi_1.default.string().pattern(/^[1-9]\d*$/).default("1").required()
+}).unknown(true);
+exports.get_all_ticket_schema = joi_1.default.object({
+    page: joi_1.default.string().pattern(/^[1-9]\d*$/).default("1").required()
+}).unknown(true);
 //# sourceMappingURL=schema.js.map

@@ -1,9 +1,11 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # dependencies
+build/
 node_modules/
 tslint.json
 .env
+.DS_Store
 
 #config File
 #config.ts

@@ -5,6 +5,7 @@ import authRouter from "./routes/auth";
 import generel_ticket_router from "./routes/general_ticket";
 import reserve_ticket_router from "./routes/reserve_ticket";
 import train_router from "./routes/trains";
+import station_router from "./routes/station"
 const router = express.Router();
 
 /*
@@ -19,6 +20,7 @@ console.log("I am  running");
 router.use("/products", productsRouter);
 router.use("/general_ticket", generel_ticket_router);
 router.use("/reservation", reserve_ticket_router);
+router.use("/station", station_router)
 router.use("/train", train_router);
 
 router.use("/user", authRouter);

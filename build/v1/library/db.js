@@ -31,6 +31,7 @@ class db {
      */
     executeQuery(query) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log(query);
             this.query = query;
             let connectionObj = new connection_1.connection();
             try {
@@ -39,6 +40,7 @@ class db {
                     throw "Not connected to database.";
                 }
                 let result = yield this.connection.query(query);
+                console.log("HHHHHHHHHHHHHHHHHHHHHHHHHH", result, query);
                 if (!result)
                     return false;
                 if (result.command == "INSERT") {
@@ -62,6 +64,27 @@ class db {
             }
         });
     }
+    insertmany(query) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log(query);
+            this.query = query;
+            let connectionObj = new connection_1.connection();
+            try {
+                this.connection = yield connectionObj.getConnection();
+                if (!this.connection) {
+                    throw "Not connected to database.";
+                }
+                let result = yield this.connection.query(query);
+                if (!result)
+                    return false;
+                return result.rows;
+            }
+            catch (error) {
+                console.error(error);
+                return false;
+            }
+        });
+    }
     /**
      * Select records from DB with appropriate table and required where conditions. This function will use in SelectRecord, allRecords, list Records function with appropriate parameters.
      * @param table table name
@@ -72,16 +95,7 @@ class db {
      * @returns array
      */
     select(table, fields, where, orderby, limit) {
-        let query = "SELECT " +
-            fields +
-            " FROM " +
-            table +
-            " " +
-            where +
-            " " +
-            orderby +
-            " " +
-            limit;
+        let query = "SELECT " + fields + " FROM " + table + " " + where + " " + orderby + " " + limit;
         console.log("fffffffffffffffffff", query);
         return this.executeQuery(query);
     }
@@ -103,13 +117,7 @@ class db {
             valuesArray[i] = valuesArray[i].replace(/'/g, "''");
         }
         let values = valuesArray.join("','");
-        let query = "INSERT INTO " +
-            table +
-            "(" +
-            columns +
-            ") values('" +
-            values +
-            "') RETURNING id";
+        let query = "INSERT INTO " + table + "(" + columns + ") values('" + values + "') RETURNING id";
         return this.executeQuery(query);
     }
     /**
@@ -157,6 +165,7 @@ class db {
      * @param data key-value pair object
      */
     insertRecord(data) {
+        console.log("DDDDDDDDDDDDYYYYYYYYYYYYYYYYYYYY", data);
         return this.insert(this.table, data);
     }
     /**
@@ -165,6 +174,7 @@ class db {
      * @param data key-value pair array
      */
     updateRecord(id, data) {
+        console.log(this.table, data, " WHERE " + this.uniqueField + "=" + id);
         return this.update(this.table, data, " WHERE " + this.uniqueField + "=" + id);
     }
     /**
